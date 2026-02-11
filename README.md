@@ -91,6 +91,8 @@ Reescribe el **buscador de listas negras** para que la búsqueda **se detenga ta
 
 > Puedes usar `AtomicInteger` o sincronización mínima sobre la región crítica del contador.
 
+[📄 Ver documentación (PDF)](doc/punto2.pdf)
+
 ---
 
 ## Parte III — (Avance) Sincronización y *Deadlocks* con *Highlander Simulator*
