@@ -80,6 +80,8 @@ edu.eci.arsw
 
 > Usa monitores de Java: **`synchronized` + `wait()` + `notify/notifyAll()`**, evitando *busy-wait*.
 
+[📄 Ver documentación (PDF)](doc/punto1.pdf)
+
 ---
 
 ## Parte II — (Antes de terminar la clase) Búsqueda distribuida y condición de parada
