@@ -1,6 +1,8 @@
 
 # ARSW — (Java 21): **Immortals & Synchronization** — con UI Swing
 
+Oscar andres sanchez porras
+
 **Escuela Colombiana de Ingeniería – Arquitecturas de Software**  
 Laboratorio de concurrencia: condiciones de carrera, sincronización, suspensión cooperativa y *deadlocks*, con interfaz **Swing** tipo *Highlander Simulator*.
 
