@@ -20,12 +20,12 @@ public final class ControlFrame extends JFrame {
   private final JSpinner countSpinner = new JSpinner(new SpinnerNumberModel(8, 2, 5000, 1));
   private final JSpinner healthSpinner = new JSpinner(new SpinnerNumberModel(100, 10, 10000, 10));
   private final JSpinner damageSpinner = new JSpinner(new SpinnerNumberModel(10, 1, 1000, 1));
-  private final JComboBox<String> fightMode = new JComboBox<>(new String[]{"ordered", "naive"});
+  private final JComboBox<String> fightMode = new JComboBox<>(new String[] { "ordered", "naive" });
 
   public ControlFrame(int count, String fight) {
     setTitle("Highlander Simulator — ARSW");
     setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-    setLayout(new BorderLayout(8,8));
+    setLayout(new BorderLayout(8, 8));
 
     JPanel top = new JPanel(new FlowLayout(FlowLayout.LEFT));
     top.add(new JLabel("Count:"));
@@ -70,32 +70,51 @@ public final class ControlFrame extends JFrame {
     manager = new ImmortalManager(n, fight, health, damage);
     manager.start();
     output.setText("Simulation started with %d immortals (health=%d, damage=%d, fight=%s)%n"
-      .formatted(n, health, damage, fight));
+        .formatted(n, health, damage, fight));
   }
 
   private void onPauseAndCheck(ActionEvent e) {
-    if (manager == null) return;
-    manager.pause();
-    List<Immortal> pop = manager.populationSnapshot();
-    long sum = 0;
-    StringBuilder sb = new StringBuilder();
-    for (Immortal im : pop) {
-      int h = im.getHealth();
-      sum += h;
-      sb.append(String.format("%-14s : %5d%n", im.name(), h));
-    }
-    sb.append("--------------------------------\n");
-    sb.append("Total Health: ").append(sum).append('\n');
-    sb.append("Score (fights): ").append(manager.scoreBoard().totalFights()).append('\n');
-    output.setText(sb.toString());
+    if (manager == null)
+      return;
+
+    new Thread(() -> {
+      try {
+        manager.pause();
+        manager.controller().awaitAllPaused();
+
+        List<Immortal> pop = manager.populationSnapshot();
+        long sum = 0;
+        StringBuilder sb = new StringBuilder();
+
+        for (Immortal im : pop) {
+          int h = im.getHealth();
+          sum += h;
+          sb.append(String.format("%-14s : %5d%n", im.name(), h));
+        }
+
+        sb.append("--------------------------------\n");
+        sb.append("Total Health: ").append(sum).append('\n');
+        sb.append("Score (fights): ")
+            .append(manager.scoreBoard().totalFights())
+            .append('\n');
+
+        SwingUtilities.invokeLater(() -> output.setText(sb.toString()));
+
+      } catch (InterruptedException ex) {
+        Thread.currentThread().interrupt();
+      }
+    }).start();
   }
 
   private void onResume(ActionEvent e) {
-    if (manager == null) return;
+    if (manager == null)
+      return;
     manager.resume();
   }
 
-  private void onStop(ActionEvent e) { safeStop(); }
+  private void onStop(ActionEvent e) {
+    safeStop();
+  }
 
   private void safeStop() {
     if (manager != null) {
