@@ -5,12 +5,13 @@ import edu.eci.arsw.concurrency.PauseController;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 public final class ImmortalManager implements AutoCloseable {
-  private final List<Immortal> population = new ArrayList<>();
+  private final List<Immortal> population = new CopyOnWriteArrayList<>();
   private final List<Future<?>> futures = new ArrayList<>();
   private final PauseController controller = new PauseController();
   private final ScoreBoard scoreBoard = new ScoreBoard();
@@ -43,10 +44,35 @@ public final class ImmortalManager implements AutoCloseable {
 
   public void pause() { controller.pause(); }
   public void resume() { controller.resume(); }
-  public void stop() {
-    for (Immortal im : population) im.stop();
-    if (exec != null) exec.shutdownNow();
-  }
+  public synchronized void stop() {
+
+    if (exec == null)
+        return;
+
+    // 1. Señal logica de parada
+    for (Immortal im : population) {
+        im.stop();
+    }
+
+    // 2. Despertar si estan en pausa
+    controller.resume();
+
+    // 3. Cierre ordenado
+    exec.shutdown();
+
+    try {
+        if (!exec.awaitTermination(5, java.util.concurrent.TimeUnit.SECONDS)) {
+            exec.shutdownNow();
+        }
+    } catch (InterruptedException e) {
+        exec.shutdownNow();
+        Thread.currentThread().interrupt();
+    }
+
+    futures.clear();
+    exec = null;
+}
+
 
   public int aliveCount() {
     int c = 0;
