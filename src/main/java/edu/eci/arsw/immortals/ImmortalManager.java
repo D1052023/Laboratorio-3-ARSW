@@ -31,7 +31,6 @@ public final class ImmortalManager implements AutoCloseable {
     for (int i=0;i<n;i++) {
       population.add(new Immortal("Immortal-"+i, initialHealth, damage, population, scoreBoard, controller));
     }
-    controller.setTotalThreads(population.size());
   }
 
   public synchronized void start() {

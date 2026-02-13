@@ -80,8 +80,7 @@ public final class ControlFrame extends JFrame {
     new Thread(() -> {
       try {
         manager.pause();
-        manager.controller().awaitAllPaused();
-
+        Thread.sleep(100);
         List<Immortal> pop = manager.populationSnapshot();
         long sum = 0;
         StringBuilder sb = new StringBuilder();
